@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS olist_seller
 
 CREATE TABLE IF NOT EXISTS product_category_name_translation
 (
-    product_category_name         VARCHAR(64),
+    product_category_name         VARCHAR(64) PRIMARY KEY,
     product_category_name_english VARCHAR(64)
 );
 
@@ -66,7 +66,8 @@ CREATE TABLE IF NOT EXISTS olist_order_item
     seller_id           VARCHAR(32),
     shipping_limit_date TIMESTAMP,
     price               DECIMAL(10, 2),
-    freight_value       DECIMAL(10, 2)
+    freight_value       DECIMAL(10, 2),
+    PRIMARY KEY (order_id, order_item_id)
 );
 
 CREATE TABLE IF NOT EXISTS olist_order_payment
@@ -75,16 +76,17 @@ CREATE TABLE IF NOT EXISTS olist_order_payment
     payment_sequential   SMALLINT,
     payment_type         VARCHAR(16),
     payment_installments SMALLINT,
-    payment_value        SMALLINT
-
+    payment_value        SMALLINT,
+    PRIMARY KEY (order_id, payment_sequential)
 );
 
-CREATE TABLE IF NOT EXISTS olist_order_review(
-    review_id VARCHAR(32) PRIMARY KEY,
-    order_id VARCHAR(32),
-    review_score SMALLINT,
-    review_comment_title VARCHAR(256),
-    review_comment_message TEXT,
-    review_creation_date TIMESTAMP,
+CREATE TABLE IF NOT EXISTS olist_order_review
+(
+    review_id               VARCHAR(32) PRIMARY KEY,
+    order_id                VARCHAR(32),
+    review_score            SMALLINT,
+    review_comment_title    VARCHAR(256),
+    review_comment_message  TEXT,
+    review_creation_date    TIMESTAMP,
     review_answer_timestamp TIMESTAMP
 );
