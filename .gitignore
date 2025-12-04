@@ -1,3 +1,5 @@
 data/
 .venv/
 notas.txt
+drop.sh
+setup.sh
