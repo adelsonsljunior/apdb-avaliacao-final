@@ -234,9 +234,9 @@ def insert_olist_order_reviews():
 if __name__ == "__main__":
     insert_product_category_name_translation()
     insert_olist_sellers()
-    insert_olist_products()
     insert_olist_customers()
     insert_olist_geolocation()
+    insert_olist_products()
     insert_olist_orders()
     insert_olist_order_items()
     insert_olist_order_payments()
