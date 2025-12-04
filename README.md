@@ -1,0 +1,56 @@
+# apdb-avaliacao-final
+
+Estrutura do projeto
+~~~
+├── datasets                    # Datasets em arquivos csvs
+├── docker-compose.yaml         # Configuração do PostgreSQL em Docker usado no projeto 
+├── load_datasets.py            # Script em python para a carga dos dados
+├── README.md                   # Este arquivo
+├── requirements.txt            # Dependências para o pip
+├── sql                         # Scripts sql
+~~~
+
+<br>
+
+## Criação do ambiente
+
+Suba o banco de dados
+~~~sh
+docker compose up -d
+~~~
+
+Crie as tabelas usando o script sql de criação
+~~~sh
+docker exec -i postgres-avaliacao psql -U postgres -d olist < sql/01_create_model.sql
+~~~
+
+<br>
+
+## Carga dos datasets
+
+Instale as dependências
+
+| Usando uv 
+
+~~~sh
+uv sync
+~~~
+~~~sh
+uv run load_datasets.py
+~~~
+
+| Usando pip
+~~~sh
+pip install -r requirements.txt
+~~~
+~~~sh
+python3 load_datasets.py
+~~~
+
+
+
+<br>
+
+
+
+
