@@ -10,8 +10,6 @@ Estrutura do projeto
 ├── sql                         # Scripts sql
 ~~~
 
-<br>
-
 ## Criação do ambiente
 
 Suba o banco de dados
@@ -23,8 +21,6 @@ Crie as tabelas usando o script sql de criação
 ~~~sh
 docker exec -i postgres-avaliacao psql -U postgres -d olist < sql/01_create_model.sql
 ~~~
-
-<br>
 
 ## Carga dos Dados
 
@@ -47,16 +43,12 @@ pip install -r requirements.txt
 python3 load_datasets.py
 ~~~
 
-<br>
-
 ## Restrições de Integridade
 
 Crie as restrições usando o script sql
 ~~~sh
 docker exec -i postgres-avaliacao psql -U postgres -d olist < sql/03_integrity_constraints.sql
 ~~~
-
-<br>
 
 ## Criar um usuário para o pessoal de BI
 
