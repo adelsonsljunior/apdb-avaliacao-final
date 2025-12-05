@@ -1,0 +1,8 @@
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM bi_user;
+
+REVOKE CONNECT ON DATABASE olist FROM bi_user;
+REVOKE USAGE ON SCHEMA public FROM bi_user;
+
+REASSIGN OWNED BY bi_user TO postgres;
+
+DROP ROLE IF EXISTS bi_user;

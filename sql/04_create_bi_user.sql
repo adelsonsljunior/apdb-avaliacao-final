@@ -1,0 +1,27 @@
+-- CREATE BI USER
+CREATE ROLE bi_user WITH
+    LOGIN
+    NOSUPERUSER
+    INHERIT
+    NOCREATEDB
+    NOCREATEROLE
+    NOREPLICATION
+    PASSWORD '123456';
+
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+
+GRANT CONNECT ON DATABASE olist TO bi_user;
+GRANT USAGE ON SCHEMA public TO bi_user;
+
+REVOKE SELECT ON ALL TABLES IN SCHEMA public FROM bi_user;
+
+GRANT SELECT ON TABLE olist_order TO bi_user;
+GRANT SELECT ON TABLE olist_product TO bi_user;
+GRANT SELECT ON TABLE olist_customer TO bi_user;
+GRANT SELECT ON TABLE olist_order_payment TO bi_user;
+GRANT SELECT ON TABLE olist_seller TO bi_user;
+GRANT SELECT ON TABLE olist_geolocation TO bi_user;
+GRANT SELECT ON TABLE olist_order_item TO bi_user;
+
+REVOKE INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public FROM bi_user;
+

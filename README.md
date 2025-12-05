@@ -55,3 +55,12 @@ Crie as restrições usando o script sql
 ~~~sh
 docker exec -i postgres-avaliacao psql -U postgres -d olist < sql/03_integrity_constraints.sql
 ~~~
+
+<br>
+
+## Criar um usuário para o pessoal de BI
+
+Crie o usuário para BI usando o script sql
+~~~sh
+docker exec -i postgres-avaliacao psql -U postgres -d olist < sql/04_create_bi_user.sql
+~~~
