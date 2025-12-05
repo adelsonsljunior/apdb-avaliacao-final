@@ -56,3 +56,16 @@ Crie o usuário para BI usando o script sql
 ~~~sh
 docker exec -i postgres-avaliacao psql -U postgres -d olist < sql/04_create_bi_user.sql
 ~~~
+
+## Estratégia de Backup
+
+| Execute o script de backup
+~~~sh
+sudo ./backup.sh
+~~~
+
+| Definir cronjob
+~~~sh
+crontab -e
+0 1 * * * ~/apdb-avaliacao-final/backup.sh
+~~~
