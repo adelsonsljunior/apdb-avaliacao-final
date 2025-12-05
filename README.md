@@ -1,15 +1,5 @@
 # apdb-avaliacao-final
 
-Estrutura do projeto
-~~~
-├── datasets                    # Datasets em arquivos csvs
-├── docker-compose.yaml         # Configuração do PostgreSQL em Docker usado no projeto 
-├── load_datasets.py            # Script em python para a carga dos dados
-├── README.md                   # Este arquivo
-├── requirements.txt            # Dependências para o pip
-├── sql                         # Scripts sql
-~~~
-
 ## Criação do ambiente
 
 Suba o banco de dados
