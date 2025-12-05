@@ -26,9 +26,9 @@ docker exec -i postgres-avaliacao psql -U postgres -d olist < sql/01_create_mode
 
 <br>
 
-## Carga dos datasets
+## Carga dos Dados
 
-Instale as dependências
+Instale as dependências e execute o script em python
 
 | Usando uv 
 
@@ -47,10 +47,11 @@ pip install -r requirements.txt
 python3 load_datasets.py
 ~~~
 
-
-
 <br>
 
+## Restrições de Integridade
 
-
-
+Crie as restrições usando o script sql
+~~~sh
+docker exec -i postgres-avaliacao psql -U postgres -d olist < sql/03_integrity_constraints.sql
+~~~
