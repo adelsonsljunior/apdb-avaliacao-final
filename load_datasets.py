@@ -1,8 +1,6 @@
 import pandas as pd
 import psycopg2
-import os
 
-# --- Configurações do Banco de Dados ---
 DB_HOST = "localhost"
 DB_PORT = "5432"
 DB_NAME = "olist"
@@ -19,9 +17,10 @@ PK_SETS = {
     "olist_order": set(),
 }
 
-# --- Funções de Conexão e Execução ---
 
-def insert_values(query: str, data: any, pk_column: str = None, pk_set_name: str = None):
+def insert_values(
+    query: str, data: any, pk_column: str = None, pk_set_name: str = None
+):
     """Insere múltiplos valores usando executemany."""
     try:
         with psycopg2.connect(
@@ -31,7 +30,7 @@ def insert_values(query: str, data: any, pk_column: str = None, pk_set_name: str
                 cursor.executemany(query, data)
 
                 print(f"{cursor.rowcount} linhas inseridas com sucesso!")
-                
+
                 # Armazena as PKs inseridas para uso no filtro de tabelas filhas
                 if pk_column and pk_set_name:
                     # CORREÇÃO: A PK (customer_id) é a primeira coluna na tupla de dados
@@ -43,8 +42,6 @@ def insert_values(query: str, data: any, pk_column: str = None, pk_set_name: str
     except (Exception, psycopg2.DatabaseError) as error:
         print(f"Erro ao inserir múltiplos dados: {error}")
 
-
-# --- Funções de Inserção de Dados (Refatoradas com tratamento) ---
 
 def insert_product_category_name_translation():
     print("\n--- Carga de Dados: product_category_name_translation ---")
@@ -60,7 +57,12 @@ def insert_product_category_name_translation():
     """
 
     # Armazena a PK (product_category_name)
-    insert_values(query=query, data=data, pk_column="product_category_name", pk_set_name="product_category_name_translation")
+    insert_values(
+        query=query,
+        data=data,
+        pk_column="product_category_name",
+        pk_set_name="product_category_name_translation",
+    )
 
 
 def insert_olist_sellers():
@@ -80,7 +82,9 @@ def insert_olist_sellers():
     """
 
     # Armazena a PK (seller_id)
-    insert_values(query=query, data=data, pk_column="seller_id", pk_set_name="olist_seller")
+    insert_values(
+        query=query, data=data, pk_column="seller_id", pk_set_name="olist_seller"
+    )
 
 
 def insert_olist_customers():
@@ -92,10 +96,15 @@ def insert_olist_customers():
         df["customer_zip_code_prefix"].astype(str).str.zfill(5)
     )
 
-    # CORREÇÃO: Para garantir que o customer_id seja a primeira coluna na tupla,
-    # reordenamos o DataFrame antes de chamar itertuples.
-    # Colunas: customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state
-    df = df[['customer_id', 'customer_unique_id', 'customer_zip_code_prefix', 'customer_city', 'customer_state']]
+    df = df[
+        [
+            "customer_id",
+            "customer_unique_id",
+            "customer_zip_code_prefix",
+            "customer_city",
+            "customer_state",
+        ]
+    ]
 
     data = list(df.itertuples(index=False, name=None))
 
@@ -109,7 +118,9 @@ def insert_olist_customers():
     """
 
     # Armazena a PK (customer_id)
-    insert_values(query=query, data=data, pk_column="customer_id", pk_set_name="olist_customer")
+    insert_values(
+        query=query, data=data, pk_column="customer_id", pk_set_name="olist_customer"
+    )
 
 
 def insert_olist_geolocation():
@@ -131,7 +142,6 @@ def insert_olist_geolocation():
         VALUES(%s, %s, %s, %s, %s)
     """
 
-    # Não armazena PK, pois a tabela não tem PK definida no script original
     insert_values(query=query, data=data)
 
 
@@ -154,24 +164,34 @@ def insert_olist_products():
 
     # 1. TRATAMENTO DE DADOS ÓRFÃOS: Filtra produtos cuja categoria não existe na tabela de tradução
     valid_categories = PK_SETS["product_category_name_translation"]
-    
+
     # Remove linhas onde a categoria é NaN OU vazia
     df = df[df["product_category_name"].notna() & (df["product_category_name"] != "")]
-    
+
     # Filtra as categorias que existem na tabela pai
     df_filtered = df[df["product_category_name"].isin(valid_categories)]
-    
+
     removed_count = len(df) - len(df_filtered)
     if removed_count > 0:
-        print(f"AVISO: {removed_count} produtos removidos por terem 'product_category_name' órfão.")
-    
+        print(
+            f"AVISO: {removed_count} produtos removidos por terem 'product_category_name' órfão."
+        )
+
     # Reordenar colunas para corresponder à query: product_id é a primeira
-    df_filtered = df_filtered[[
-        "product_id", "product_category_name", "product_name_lenght", 
-        "product_description_lenght", "product_photos_qty", "product_weight_g", 
-        "product_length_cm", "product_height_cm", "product_width_cm"
-    ]]
-    
+    df_filtered = df_filtered[
+        [
+            "product_id",
+            "product_category_name",
+            "product_name_lenght",
+            "product_description_lenght",
+            "product_photos_qty",
+            "product_weight_g",
+            "product_length_cm",
+            "product_height_cm",
+            "product_width_cm",
+        ]
+    ]
+
     data = list(df_filtered.itertuples(index=False, name=None))
 
     query = """
@@ -184,7 +204,9 @@ def insert_olist_products():
     """
 
     # Armazena a PK (product_id)
-    insert_values(query=query, data=data, pk_column="product_id", pk_set_name="olist_product")
+    insert_values(
+        query=query, data=data, pk_column="product_id", pk_set_name="olist_product"
+    )
 
 
 def insert_olist_orders():
@@ -196,19 +218,28 @@ def insert_olist_orders():
 
     # 1. TRATAMENTO DE DADOS ÓRFÃOS: Filtra pedidos cujo cliente não existe
     valid_customers = PK_SETS["olist_customer"]
-    
+
     df_filtered = df[df["customer_id"].isin(valid_customers)]
-    
+
     removed_count = len(df) - len(df_filtered)
     if removed_count > 0:
-        print(f"AVISO: {removed_count} pedidos removidos por terem 'customer_id' órfão.")
+        print(
+            f"AVISO: {removed_count} pedidos removidos por terem 'customer_id' órfão."
+        )
 
     # Reordenar colunas para corresponder à query: order_id é a primeira
-    df_filtered = df_filtered[[
-        "order_id", "customer_id", "order_status", "order_purchase_timestamp", 
-        "order_approved_at", "order_delivered_carrier_date", 
-        "order_delivered_customer_date", "order_estimated_delivery_date"
-    ]]
+    df_filtered = df_filtered[
+        [
+            "order_id",
+            "customer_id",
+            "order_status",
+            "order_purchase_timestamp",
+            "order_approved_at",
+            "order_delivered_carrier_date",
+            "order_delivered_customer_date",
+            "order_estimated_delivery_date",
+        ]
+    ]
 
     data = list(df_filtered.itertuples(index=False, name=None))
 
@@ -222,7 +253,9 @@ def insert_olist_orders():
     """
 
     # Armazena a PK (order_id)
-    insert_values(query=query, data=data, pk_column="order_id", pk_set_name="olist_order")
+    insert_values(
+        query=query, data=data, pk_column="order_id", pk_set_name="olist_order"
+    )
 
 
 def insert_olist_order_items():
@@ -234,22 +267,29 @@ def insert_olist_order_items():
     valid_orders = PK_SETS["olist_order"]
     valid_products = PK_SETS["olist_product"]
     valid_sellers = PK_SETS["olist_seller"]
-    
+
     df_filtered = df[
-        df["order_id"].isin(valid_orders) &
-        df["product_id"].isin(valid_products) &
-        df["seller_id"].isin(valid_sellers)
+        df["order_id"].isin(valid_orders)
+        & df["product_id"].isin(valid_products)
+        & df["seller_id"].isin(valid_sellers)
     ]
-    
+
     removed_count = len(df) - len(df_filtered)
     if removed_count > 0:
         print(f"AVISO: {removed_count} itens de pedido removidos por terem FKs órfãs.")
 
     # Reordenar colunas para corresponder à query
-    df_filtered = df_filtered[[
-        "order_id", "order_item_id", "product_id", "seller_id", 
-        "shipping_limit_date", "price", "freight_value"
-    ]]
+    df_filtered = df_filtered[
+        [
+            "order_id",
+            "order_item_id",
+            "product_id",
+            "seller_id",
+            "shipping_limit_date",
+            "price",
+            "freight_value",
+        ]
+    ]
 
     data = list(df_filtered.itertuples(index=False, name=None))
 
@@ -272,18 +312,25 @@ def insert_olist_order_payments():
 
     # 1. TRATAMENTO DE DADOS ÓRFÃOS: Filtra pagamentos cujo pedido não existe
     valid_orders = PK_SETS["olist_order"]
-    
+
     df_filtered = df[df["order_id"].isin(valid_orders)]
-    
+
     removed_count = len(df) - len(df_filtered)
     if removed_count > 0:
-        print(f"AVISO: {removed_count} pagamentos removidos por terem 'order_id' órfão.")
+        print(
+            f"AVISO: {removed_count} pagamentos removidos por terem 'order_id' órfão."
+        )
 
     # Reordenar colunas para corresponder à query
-    df_filtered = df_filtered[[
-        "order_id", "payment_sequential", "payment_type", 
-        "payment_installments", "payment_value"
-    ]]
+    df_filtered = df_filtered[
+        [
+            "order_id",
+            "payment_sequential",
+            "payment_type",
+            "payment_installments",
+            "payment_value",
+        ]
+    ]
 
     data = list(df_filtered.itertuples(index=False, name=None))
 
@@ -307,18 +354,27 @@ def insert_olist_order_reviews():
 
     # 1. TRATAMENTO DE DADOS ÓRFÃOS: Filtra avaliações cujo pedido não existe
     valid_orders = PK_SETS["olist_order"]
-    
+
     df_filtered = df[df["order_id"].isin(valid_orders)]
-    
+
     removed_count = len(df) - len(df_filtered)
     if removed_count > 0:
-        print(f"AVISO: {removed_count} avaliações removidas por terem 'order_id' órfão.")
+        print(
+            f"AVISO: {removed_count} avaliações removidas por terem 'order_id' órfão."
+        )
 
     # Reordenar colunas para corresponder à query
-    df_filtered = df_filtered[[
-        "review_id", "order_id", "review_score", "review_comment_title", 
-        "review_comment_message", "review_creation_date", "review_answer_timestamp"
-    ]]
+    df_filtered = df_filtered[
+        [
+            "review_id",
+            "order_id",
+            "review_score",
+            "review_comment_title",
+            "review_comment_message",
+            "review_creation_date",
+            "review_answer_timestamp",
+        ]
+    ]
 
     data = list(df_filtered.itertuples(index=False, name=None))
 
@@ -334,26 +390,19 @@ def insert_olist_order_reviews():
     insert_values(query=query, data=data)
 
 
-# --- Função Principal Refatorada ---
-
 def main():
     print("--- INÍCIO DO PROCESSO DE CARREGAMENTO E TRATAMENTO DE DADOS ---")
-    
-    # 1. Carregar as tabelas pais (que não dependem de outras)
+
     insert_product_category_name_translation()
     insert_olist_sellers()
     insert_olist_customers()
     insert_olist_geolocation()
+    insert_olist_products()  # Depende de product_category_name_translation
+    insert_olist_orders()  # Depende de olist_customer
+    insert_olist_order_items()  # Depende de olist_order, olist_product, olist_seller
+    insert_olist_order_payments()  # Depende de olist_order
+    insert_olist_order_reviews()  # Depende de olist_order
 
-    # 2. Carregar as tabelas filhas de primeiro nível (com tratamento de FKs)
-    insert_olist_products() # Depende de product_category_name_translation
-    insert_olist_orders() # Depende de olist_customer
-
-    # 3. Carregar as tabelas filhas de segundo nível (com tratamento de FKs)
-    insert_olist_order_items() # Depende de olist_order, olist_product, olist_seller
-    insert_olist_order_payments() # Depende de olist_order
-    insert_olist_order_reviews() # Depende de olist_order
-    
     print("\n--- PROCESSO CONCLUÍDO COM SUCESSO ---")
 
 
